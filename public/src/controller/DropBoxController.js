@@ -1,5 +1,7 @@
 class DropBoxController {
   constructor() {
+    this.onselectionchange = new Event('selectionchange');
+
     this.btnSendFileEl = document.querySelector("#btn-send-file");
     this.inputFilesEl = document.querySelector("#files");
     this.snackModalEl = document.querySelector("#react-snackbar-root");
@@ -7,6 +9,10 @@ class DropBoxController {
     this.nameFileEl = this.snackModalEl.querySelector('.filename')
     this.timeleftEl = this.snackModalEl.querySelector('.timeleft')
     this.listFilesEl = document.querySelector('#list-of-files-and-directories')
+    
+    this.btnNewFolder = document.querySelector('#btn-new-folder')
+    this.btnRename = document.querySelector('#btn-rename')
+    this.btnDelete = document.querySelector('#btn-delete')
 
     this.connectFirebase();
     this.initEvents();
@@ -18,7 +24,32 @@ class DropBoxController {
     // firebase.initializeApp(firebaseConfig);
   }
 
+  getSelection() {
+    return this.listFilesEl.querySelectorAll('.selected');
+  }
+
   initEvents() {
+
+    this.listFilesEl.addEventListener('selectionchange', e => {
+      
+      switch (this.getSelection().length) {
+        case 0:
+          this.btnDelete.style.display = 'none';
+          this.btnRename.style.display = 'none';
+          break;
+        
+        case 1:
+          this.btnDelete.style.display = 'block';
+          this.btnRename.style.display = 'block';
+          break;
+
+        default:
+          this.btnDelete.style.display = 'block';
+          this.btnRename.style.display = 'none';
+      }
+      
+    })
+
     this.btnSendFileEl.addEventListener("click", (event) => {
       this.inputFilesEl.click();
     });
@@ -345,6 +376,8 @@ class DropBoxController {
               el.classList.add('selected')
             }
           })
+
+          this.listFilesEl.dispatchEvent(this.onselectionchange)
           return true;
         }
       }
@@ -356,6 +389,7 @@ class DropBoxController {
       }
 
       li.classList.toggle('selected')
+      this.listFilesEl.dispatchEvent(this.onselectionchange)
     })
   }
 
